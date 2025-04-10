@@ -1,0 +1,86 @@
+services:
+  # Frontend service
+  frontend:
+    image: forkmemaybe/shop-sphere:frontend
+    ports:
+      - 5173:80
+    restart: always
+    depends_on:
+      - backend
+
+  # Backend services
+  backend:
+    image: forkmemaybe/shop-sphere:backend
+    command: ./wait-for-it.sh postgres:5432 -- ./docker-entrypoint.sh
+    ports:
+      - 8000:8000
+    depends_on:
+      - redis
+      - postgres
+    restart: on-failure
+    volumes:
+      - ./backend:/app
+
+  postgres:
+    image: postgres:17.4
+    ports:
+      - 5432:5432
+    restart: always
+    environment:
+      POSTGRES_DB: shop_sphere
+      POSTGRES_USER: odd
+      POSTGRES_PASSWORD: MyPassword
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:6.2-alpine
+    ports:
+      - 6379:6379
+    restart: always
+    volumes:
+      - redisdata:/data
+
+  celery:
+    image: forkmemaybe/shop-sphere:celery
+    command: celery -A Shop_Sphere worker --loglevel=info
+    depends_on:
+      - redis
+    volumes:
+      - ./backend:/app
+
+  celery-beat:
+    image: forkmemaybe/shop-sphere:celery-beat
+    command: celery -A Shop_Sphere beat --loglevel=info
+    depends_on:
+      - redis
+    volumes:
+      - ./backend:/app
+
+  flower:
+    image: forkmemaybe/shop-sphere:flower
+    command: celery -A Shop_Sphere flower
+    depends_on:
+      - backend
+      - redis
+      - celery
+    environment:
+      DEBUG: 1
+      CELERY_BROKER: redis://redis:6379/0
+      CELERY_BACKEND: redis://redis:6379/0
+    ports:
+      - 5555:5555
+
+  tests:
+    image: forkmemaybe/shop-sphere:tests
+    command: ./wait-for-it.sh postgres:5432 -- ptw
+    depends_on:
+      - redis
+      - postgres
+    tty: true
+    volumes:
+      - ./backend:/app
+
+volumes:
+  pgdata:
+  redisdata:
