@@ -14,7 +14,7 @@ from django.shortcuts import render
 from django.middleware.csrf import get_token
 from django.template.loader import render_to_string
 from django.http import HttpResponse
-from django.middleware.csrf import get_token
+from django.views.decorators.csrf import csrf_exempt
 
 
 # @ensure_csrf_cookie
@@ -31,7 +31,7 @@ from django.middleware.csrf import get_token
 def get_csrf_token(request):
     return JsonResponse({"detail": "CSRF cookie set"})
 
-
+@csrf_exempt
 def send_otp(request):
     if request.method == "POST":
         try:
@@ -67,7 +67,7 @@ def send_otp(request):
             }
         )
 
-
+@csrf_exempt
 def verify_otp(request):
     if request.method == "POST":
         # email = request.POST.get("email")

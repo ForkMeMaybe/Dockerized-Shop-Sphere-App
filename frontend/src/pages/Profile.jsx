@@ -1025,7 +1025,7 @@ const Profile = () => {
     setUpdatedFields((prev) => ({
       ...prev,
       [name]: value !== originalUser[name],
-    }));
+    }));   
     if (name === "email" && otpVerified) {
       setShowUpdateButton((prev) => ({ ...prev, email: true }));
     }
@@ -1303,7 +1303,10 @@ const Profile = () => {
                         <>
                           <button
                             type="button"
-                            onClick={() => handleSave(field)}
+                            onClick={async () => {
+                              handleSave(field);
+                              await handleUpdate(field);
+                            }}
                             className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all shadow-sm hover:shadow"
                           >
                             <Save className="w-4 h-4" />

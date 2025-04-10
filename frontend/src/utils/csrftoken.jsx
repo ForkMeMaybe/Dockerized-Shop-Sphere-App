@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 const API_BASE_URL = import.meta.env.VITE_API_URL;
+import axios from 'axios';
+import Cookies from 'js-cookie';
 
 export const getCookie = (name) => {
   const value = `; ${document.cookie}`;
@@ -9,6 +11,8 @@ export const getCookie = (name) => {
 };
 
 // ✅ Function to Refresh CSRF Token
+
+// Original
 export const refreshCsrfToken = async () => {
   try {
     const response = await fetch(`${API_BASE_URL}/get_csrf_token/`, {
@@ -30,6 +34,8 @@ export const refreshCsrfToken = async () => {
 };
 
 // ✅ Custom Hook to Use CSRF Token
+
+// Original
 export const useCsrfToken = () => {
   const [csrfToken, setCsrfToken] = useState(localStorage.getItem("csrftoken") || "");
 
